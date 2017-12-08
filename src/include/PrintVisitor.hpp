@@ -26,6 +26,7 @@ namespace SynthLib2Parser {
         std::set<std::string> BasicOperators;
         std::size_t cex_counter;
         std::size_t program_counter;
+        std::string declarations;
         bool first_declaration;
 
 

@@ -497,7 +497,7 @@ int SygusTrackValidator(char* benchmark, char* track)
 }
 
 
-
+#include <iostream>
 
 // reads a sygus file, and outputs another
 // if compile = true, the output is in core Sygus
@@ -506,18 +506,19 @@ int SygusParser(char* input, char* output, bool compile)
 {
     try {
         
-        string input_p = string(input) + "__tmp";
+        string input_p = string(input) + "_tmp";
         AnyArityToTwoArity(input,(char *)input_p.c_str());
         SynthLib2Parser::SynthLib2Parser* Parser = new SynthLib2Parser::SynthLib2Parser();
         (*Parser)(input_p);
         SynthLib2Parser::SymbolTable* SymTbl = Parser->GetSymbolTable();
         SynthLib2Parser::Program* Prog = Parser->GetProgram();
-
+        std::cout<<(*Parser->GetProgram()) << std::endl;
         ofstream OutFile;
         OutFile.open(output);
-        SynthLib2Parser::PrintVisitor bench(OutFile,SymTbl,compile);
-        Prog->Accept(&bench);
-	OutFile.close();
+        OutFile << (*Parser->GetProgram()) << std::endl;
+    //    SynthLib2Parser::PrintVisitor bench(OutFile,SymTbl,compile);
+     //   Prog->Accept(&bench);
+        OutFile.close();
 
         delete Parser;
         SynthLib2Parser::LogicSymbolLoader::Reset();

@@ -1,6 +1,7 @@
 #include <PrintVisitor.hpp>
 #include <SymbolTable.hpp>
-
+#include <algorithm>
+#include <boost/algorithm/string/replace.hpp>
 
 namespace SynthLib2Parser {
 
@@ -39,48 +40,24 @@ void PrintVisitor::GetStringToOperatorMap()
        BasicOperators.insert("/");
        BasicOperators.insert("%");
        BasicOperators.insert("==");
+       BasicOperators.insert("<");
+       BasicOperators.insert("<=");
+       BasicOperators.insert(">");
+       BasicOperators.insert(">=");
 }
 
 std::string PrintVisitor::ReformatFunctionName(const std::string& name)
 {
-  /*if(name=="bvand")
-    return  "&";
-   if(name=="bvor")
-    return  "|";
-   if(name=="bvxor")
-    return  "^";
-   if(name=="bvnot" || name =="bvneg")
-    return  "~";
-   if(name=="bvlshl" || name=="bvlahl" ||  name=="bvshl")
-    return " << ";
-   if(name=="bvlshr" || name=="bvashr")
-    return " >> ";
-   if(name=="bvadd")
-      return  "+";
-   if(name=="bvsub")
-      return  "-";
-   if(name=="bvmul")
-      return  "*";
-   if(name=="bvudiv" || name=="bvsdiv")
-      return  "/";
-   if(name=="bvurem" || name=="bvsrem")
-      return " % ";
-   if(name=="bvlshr")
-      return " >> ";
-   if(name=="not")
-     return "!";
-   if(name=="xor")
-     return "^";
-   if(name=="and")
-     return "&&";
-   if(name=="or")
-     return "||";
-   if(name=="=")
-     return "==";
-   if(name=="true")
-     return "1";*/
    if(String2OperatorMap.find(name)!=String2OperatorMap.end())
      return String2OperatorMap[name];
+
+   if(name.find('-')!=std::string::npos &&
+       BasicOperators.find(name)==BasicOperators.end())
+   {
+     std::string result = name;
+     std::replace( result.begin(), result.end(), '-', '_');
+     return result;
+   }
 
    return name;
 }
@@ -89,7 +66,7 @@ std::string PrintVisitor::ReformatFunctionName(const std::string& name)
 std::string PrintVisitor::ReformatLiteralString(const std::string& name)
 {
   std::string result = name;
-  if(name.find("#x",0)==0)
+  if(name.find("#x")!=std::string::npos)
   {
     result.erase(0,2);
     result = std::to_string(std::stoi(result,nullptr,16));
@@ -104,13 +81,19 @@ std::string PrintVisitor::ReformatLiteralString(const std::string& name)
   if(name=="false")
     result = "0";
 
-    return result;
+  return result;
 }
 
 std::string PrintVisitor::ReformatSymbol(const std::string& name)
 {
-//  if(name=="true")
-  //  return "1";
+
+  if(name.find('-')!=std::string::npos)
+    {
+      std::string result = name;
+      std::replace( result.begin(), result.end(), '-', '_');
+      return result;
+    }
+
   return name;
 }
 
@@ -183,6 +166,10 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
 
     void PrintVisitor::VisitProgram(const Program* Prog)
     {
+        cex_counter=0;
+        program_counter=0;
+        first_declaration=true;
+        GetStringToOperatorMap();
         for(auto const& Cmd : Prog->GetCmds()) {
             Cmd->Accept(this);
         }
@@ -191,90 +178,83 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
 
     void PrintVisitor::VisitFunDefCmd(const FunDefCmd* Cmd)
     {
-        Out << GetIndent() << "(define-fun " << Cmd->GetFunName() << " (";
-        for(auto const& ASPair : Cmd->GetArgs()) {
-            ASPair->Accept(this);
-        }
-        Out << ") ";
-        Cmd->GetSort()->Accept(this);
-        Out << endl;
-        IndentLevel++;
-        Out << GetIndent();
-        Cmd->GetTerm()->Accept(this);
-        Out << endl;
-        IndentLevel--;
-        Out << ")" << endl << endl;
+      Out << GetIndent();
+      Out <<"// define function " << endl;
+      Cmd->GetSort()->Accept(this);
+      Out << " " << ReformatFunctionName(Cmd->GetFunName()) << "( ";
+      bool first=true;
+
+      for (auto const& ASPair : Cmd->GetArgs()) {
+      if (!first)
+      Out << ", ";
+      else
+      first = false;
+      ASPair->Accept(this);
+      }
+      Out << " )" << endl << "{" << endl;
+      IndentLevel++;
+      Out << GetIndent();
+      Out << "return ";
+      Cmd->GetTerm()->Accept(this);
+      Out << ";";
+      IndentLevel--;
+      Out << endl << "}" << endl << endl;
     }
 
     void PrintVisitor::VisitFunDeclCmd(const FunDeclCmd* Cmd)
     {
-        Out << GetIndent() << "(declare-fun " << Cmd->GetFunName() << " (";
-        for(auto const& Sort : Cmd->GetArgSorts()) {
-            Sort->Accept(this);
+      Out << "// Declare function" << endl;
+      Cmd->GetSort()->Accept(this);
+      Out << " " << ReformatFunctionName(Cmd->GetFunName()) << "( ";
+      bool first=true;
+
+      for (auto const& Sort : Cmd->GetArgSorts()) {
+        if (!first)
+        Out << ", ";
+        else
+        first = false;
+        Sort->Accept(this);
         }
-        Out << ") ";
-        Cmd->GetSort()->Accept(this);
-        Out << ")" << endl << endl;
+      Out << " );" << endl << endl;
     }
 
     void PrintVisitor::VisitSynthFunCmd(const SynthFunCmd* Cmd) 
     {
-        Out << GetIndent() << "(synth-fun " << Cmd->GetFunName() << " (";
-        for(auto const& ASPair : Cmd->GetArgs()) {
-            ASPair->Accept(this);
-        }
-        Out << ") ";
+      Out << GetIndent();
+        Out << "// Function to synthesise" << endl;
         Cmd->GetSort()->Accept(this);
-        Out << endl;
-        IndentLevel++;        
-        
-        if (!Cmd->GetGrammarRules().empty()) {
-            Out << GetIndent() << "(";
-            IndentLevel++;
-            for(auto const& Rule : Cmd->GetGrammarRules()) {
-                Rule->Accept(this);
-                Out << endl;
-            }
-            IndentLevel--;
-            Out << ")" << endl;
+        Out << " " << ReformatFunctionName(Cmd->GetFunName()) << "( const ";
+        bool first=true;
+        for(auto const& ASPair : Cmd->GetArgs()) {
+          if(!first)
+            Out<<", const ";
+                    ASPair->Accept(this);
+                    first=false;
+                }
+        Out << ")" << endl << "{" <<endl;
+
+        IndentLevel++;
+        Out <<GetIndent();
+        for (auto const& ASPair : Cmd->GetArgs())
+        {
+          Out << "const ";
+          ASPair->Accept(this);
+          Out << "= 0u;"<<endl;
         }
-        else if (Compile) { 
-            string Error = "Currently the only implicit allowed grammar is LIA;"; 
-            Error += " sorts are resitrincted to Bool and Int.";
-            //Out << LogicGrammars[LogicName] << endl;
-            if (Cmd->GetSort()->GetKind() == SORTKIND_BOOL) {
-                Out << "((Start Bool (StartBool))" << endl;
-            }
-            else if (Cmd->GetSort()->GetKind() == SORTKIND_INT) {
-                Out << "((Start Int (StartInt))" << endl;
-            }
-            else {
-               throw SynthLib2ParserException(Error); 
-            }
-            string BoolArgs = "";
-            string IntArgs = "";
-            for(auto const& ASPair : Cmd->GetArgs()) {
-                if (ASPair->GetSort()->GetKind() == SORTKIND_BOOL)
-                    BoolArgs += ASPair->GetName() + " ";
-                else if (ASPair->GetSort()->GetKind() == SORTKIND_INT)
-                    IntArgs += ASPair->GetName() + " ";
-                else 
-                    throw SynthLib2ParserException(Error);
-            }
-            Out << "(StartInt Int (" << IntArgs << LogicGrammars["StartInt"] << "))" << endl << endl;
-            Out << "(ConstantInt Int ("  << LogicGrammars["ConstantInt"] << "))" << endl;
-            Out << "(StartBool Bool (" << BoolArgs << LogicGrammars["StartBool"] << ")))" << endl;
-            
-        }
-        
+
+        Cmd->GetSort()->Accept(this);
+        Out << " result = 0;" << endl;
+        Out << GetIndent() << "__CPROVER_program_" << program_counter << ":;"<< endl;
+        Out << GetIndent() << "return result;" << endl <<"}"<< endl;
+        program_counter++;
         IndentLevel--;
-        Out << ")" << endl << endl;
     }
 
      void PrintVisitor::VisitSynthInvCmd(const SynthInvCmd* Cmd) 
     {  
+       Out << " // Synthesise invariant \n";
 
-        string CmdName = Compile? "synth-fun" : "synth-inv";
+   /*     string CmdName = Compile? "synth-fun" : "synth-inv";
         string RetSort = Compile? " Bool\n" : "\n ";
 
         Out << GetIndent() << "(" << CmdName << " " << Cmd->GetInvName() << " (";
@@ -316,33 +296,41 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
         }
 
         IndentLevel--;
-        Out << ")" << endl << endl;
+        Out << ")" << endl << endl;*/
     }   
 
     void PrintVisitor::VisitSortDefCmd(const SortDefCmd* Cmd)
     {
-        Out << GetIndent() << "(define-sort " << Cmd->GetName() << " ";
+        Out << GetIndent() << "//(define-sort " << Cmd->GetName() << " ";
         Cmd->GetSortExpr()->Accept(this);
         Out << ")" << endl << endl;
     }
 
     void PrintVisitor::VisitSetOptsCmd(const SetOptsCmd* Cmd)
     {
-        Out << GetIndent() << "(set-opts (";
+       /* Out << GetIndent() << "(set-opts (";
         IndentLevel++;
         for(auto const& Opt : Cmd->GetOpts()) {
             Out << endl << GetIndent() << "(" << Opt.first << " \"" << Opt.second << "\")";
         }
         Out << endl;
         IndentLevel--;
-        Out << GetIndent() << "))" << endl << endl;
+        Out << GetIndent() << "))" << endl << endl;*/
     }
 
     void PrintVisitor::VisitVarDeclCmd(const VarDeclCmd* Cmd)
     {
-        Out << GetIndent() << "(declare-var " << Cmd->GetName() << " ";
-        Cmd->GetSort()->Accept(this);
-        Out << ")" << endl << endl;
+      if (cex_counter == 0)
+      {
+        Out << "void main(void)" << endl << "{" << endl;
+        IndentLevel++;
+      }
+      Out << GetIndent() << "__CPROVER_counterexample_" << cex_counter << ":"
+          << endl;
+      cex_counter++;
+      Out << GetIndent();
+      Cmd->GetSort()->Accept(this);
+      Out << " " << ReformatSymbol(Cmd->GetName()) << ";" << endl << endl;
     }
 
     void PrintVisitor::VisitPrimedVarDeclCmd(const PrimedVarDeclCmd* Cmd)
@@ -352,24 +340,23 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
           Cmd->GetSort()->Accept(this);
           Out << ")" << endl << endl;
         }
-        else {
+     /*   else {
           Out << GetIndent() << "(declare-var " << Cmd->GetName() << " ";
           Cmd->GetSort()->Accept(this);
           Out << ")" << endl;
           Out << GetIndent() << "(declare-var " << Cmd->GetName() << "! ";
           Cmd->GetSort()->Accept(this);
           Out << ")" << endl << endl;
-        }
+        }*/
     }
 
 
     void PrintVisitor::VisitConstraintCmd(const ConstraintCmd* Cmd) 
     {
-        Out << "(constraint " << endl;
-        IndentLevel++;
-        Cmd->GetTerm()->Accept(this);
-        IndentLevel--;
-        Out << endl << GetIndent() << ")" << endl << endl;
+      Out << GetIndent();
+      Out << "__CPROVER_assert( ";
+      Cmd->GetTerm()->Accept(this);
+      Out << ", \"\" );" <<endl << endl;
     }
 
     void PrintVisitor::VisitInvConstraintCmd(const InvConstraintCmd* Cmd) 
@@ -454,37 +441,34 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
 
     void PrintVisitor::VisitSetLogicCmd(const SetLogicCmd* Cmd)
     {
-        Out << GetIndent() << "(set-logic " << Cmd->GetLogicName() << ")" << endl << endl;
+        Out << GetIndent() << "//(set-logic " << Cmd->GetLogicName() << ")" << endl << endl;
     }
 
     void PrintVisitor::VisitCheckSynthCmd(const CheckSynthCmd* Cmd)
     {
-        Out << GetIndent() << "(check-synth)" << endl << endl;
+       // Out << GetIndent() << "//(check-synth)" << endl << endl;
+        Out << endl << "}"<<endl;
     }
 
     void PrintVisitor::VisitArgSortPair(const ArgSortPair* ASPair) 
     {
-        Out << "(" << ASPair->GetName() << " ";
-        ASPair->GetSort()->Accept(this);
-        Out << ")";
+      ASPair->GetSort()->Accept(this);
+      Out << " " << ReformatSymbol(ASPair->GetName()) <<" ";
     }
     
     void PrintVisitor::VisitIntSortExpr(const IntSortExpr* Sort)
     {
-        Out << "Int";
+        Out << "unsigned int";
     }
 
     void PrintVisitor::VisitStringSortExpr(const StringSortExpr* Sort)
     {
-        Out << "String";
+        Out << "std::string";
     }
 
     void PrintVisitor::VisitBVSortExpr(const BVSortExpr* Sort)
     {
-	if (Compile) // output needs to by SyGuS format
-	        Out << "(BitVec " << Sort->GetSize() << ")";
-	else        // output needs to be SMT format
-        	Out << "(_ BitVec " << Sort->GetSize() << ")";
+      Out << "unsigned __CPROVER_bitvector[" << Sort->GetSize() << "]";
     }
 
     void PrintVisitor::VisitNamedSortExpr(const NamedSortExpr* Sort)
@@ -494,16 +478,15 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
 
     void PrintVisitor::VisitArraySortExpr(const ArraySortExpr* Sort) 
     {
-        Out << "(Array ";
-        Sort->GetDomainSort()->Accept(this);
-        Out << " ";
+      Sort->GetDomainSort()->Accept(this);
+        Out << "[";
         Sort->GetRangeSort()->Accept(this);
-        Out << ")";
+        Out << "]" << endl;
     }
 
     void PrintVisitor::VisitRealSortExpr(const RealSortExpr* Sort)
     {
-        Out << "Real";
+        Out << "double";
     }
 
     void PrintVisitor::VisitFunSortExpr(const FunSortExpr* Sort)
@@ -513,37 +496,80 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
 
     void PrintVisitor::VisitBoolSortExpr(const BoolSortExpr* Sort)
     {
-        Out << "Bool";
+        Out << "__CPROVER_bool";
     }
 
     void PrintVisitor::VisitEnumSortExpr(const EnumSortExpr* Sort)
     {
-        Out << "(Enum (";
-        for(auto const& Con : Sort->GetConstructors()) {
-            Out << Con << " ";
-        }
-        Out << "))";
+      Out << "enum {";
+      for(auto const& Con : Sort->GetConstructors()) {
+                  Out << Con << ",";
+              }
+      Out <<"}";
     }
     
     void PrintVisitor::VisitLetBindingTerm(const LetBindingTerm* Binding)
     {
+      Out <<" //";
+      Binding->GetVarSort()->Accept(this);
+      Out << endl;
+      Out << Binding->GetVarName() << " = ";
+      Binding->GetBoundToTerm()->Accept(this);
+      Out << ";" << endl << endl;
+
+  /*
         Out << "(" << Binding->GetVarName() << " ";
 	if (!SMTlet) {
 	  Binding->GetVarSort()->Accept(this);
           Out << " ";
 	}
         Binding->GetBoundToTerm()->Accept(this);
-        Out << ")";
+        Out << ")";*/
     }
     
     void PrintVisitor::VisitFunTerm(const FunTerm* TheTerm)
     {
-        Out << "(" << TheTerm->GetFunName();
-        for(auto const& Arg : TheTerm->GetArgs()) {
-            Out << " ";
-            Arg->Accept(this);
+      if(TheTerm ->GetArgs().size()==2 &&
+            (String2OperatorMap.find(TheTerm->GetFunName())!=String2OperatorMap.end() ||
+          BasicOperators.find(TheTerm->GetFunName())!=BasicOperators.end()))
+        {
+          Out << "(";
+          TheTerm->GetArgs()[0]->Accept(this);
+          Out << " "<< ReformatFunctionName(TheTerm->GetFunName()) << " ";
+          TheTerm->GetArgs()[1]->Accept(this);
+          Out << ")";
+        }
+        else if(TheTerm->GetArgs().size()==3 && TheTerm->GetFunName()=="ite")
+        {
+          Out <<"((";
+          TheTerm->GetArgs()[0]->Accept(this);
+          Out <<") ? (";
+          TheTerm->GetArgs()[1]->Accept(this);
+          Out << ") : (";
+          TheTerm->GetArgs()[2]->Accept(this);
+          Out << "))";
+        }
+        else if(TheTerm->GetFunName()=="=>" && TheTerm ->GetArgs().size()==2 )
+        {
+          Out <<"!( ";
+          TheTerm->GetArgs()[0]->Accept(this);
+          Out <<") || (";
+          TheTerm->GetArgs()[1]->Accept(this);
+          Out <<")";
+        }
+        else
+        {
+          Out << " "<< ReformatFunctionName(TheTerm->GetFunName()) << "( ";
+        bool first = true;
+        for (auto const& Arg : TheTerm->GetArgs()) {
+        if (!first)
+          Out << ", ";
+        Arg->Accept(this);
+        first = false;
         }
         Out << ")";
+        }
+
     }
 
     void PrintVisitor::VisitLiteralTerm(const LiteralTerm* TheTerm)
@@ -553,35 +579,40 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
 
     void PrintVisitor::VisitSymbolTerm(const SymbolTerm* TheTerm) 
     {
-        Out << TheTerm->GetSymbol();
+        Out << ReformatSymbol(TheTerm->GetSymbol());
     }
 
     void PrintVisitor::VisitLetTerm(const LetTerm* TheTerm)
     {
-        Out << "(let (";
-        IndentLevel++;
-        for(auto const& Binding : TheTerm->GetBindings()) {
-            Binding->Accept(this);
-        }
-        Out << ")" << endl;
+      Out <<"{" << endl;
         Out << GetIndent();
-        TheTerm->GetBoundInTerm()->Accept(this);
-        IndentLevel--;
-        Out << endl << GetIndent() << ")";
+
+       // Out << "(let (" << endl;
+          IndentLevel++;
+          for(auto const& Binding : TheTerm->GetBindings()) {
+              Binding->Accept(this);
+          }
+   //     Out << ")" << endl;
+          Out << GetIndent();
+          TheTerm->GetBoundInTerm()->Accept(this);
+          IndentLevel--;
+  //        Out << endl << GetIndent() << ")";
     }
     
     void PrintVisitor::VisitLetBindingGTerm(const LetBindingGTerm* Binding) 
     {
-        Out << "(" << Binding->GetVarName() << " ";
-        Binding->GetVarSort()->Accept(this);
-        Out << " ";
-        Binding->GetBoundToTerm()->Accept(this);
-        Out << ")";
+      Out <<" //";
+      Binding->GetVarSort()->Accept(this);
+      Out << endl;
+      Out << ReformatSymbol(Binding->GetVarName()) << " = ";
+      Binding->GetBoundToTerm()->Accept(this);
+      Out << ";" << endl << endl;
     }
     
     void PrintVisitor::VisitFunGTerm(const FunGTerm* TheTerm) 
     {
-        Out << "(" << TheTerm->GetName();
+      Out << " // Function G Term" << endl;
+        Out << "(" << ReformatSymbol(TheTerm->GetName());
         for(auto const& Arg : TheTerm->GetArgs()) {
             Out << " ";
             Arg->Accept(this);
