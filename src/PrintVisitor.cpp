@@ -51,15 +51,18 @@ std::string PrintVisitor::ReformatFunctionName(const std::string& name)
    if(String2OperatorMap.find(name)!=String2OperatorMap.end())
      return String2OperatorMap[name];
 
+   std::string result = name;
    if(name.find('-')!=std::string::npos &&
        BasicOperators.find(name)==BasicOperators.end())
    {
-     std::string result = name;
      std::replace( result.begin(), result.end(), '-', '_');
-     return result;
+   }
+   if (name.find('.') != std::string::npos &&
+       BasicOperators.find(name) == BasicOperators.end()) {
+     std::replace(result.begin(), result.end(), '.', '_');
    }
 
-   return name;
+   return result;
 }
 
 
@@ -69,12 +72,12 @@ std::string PrintVisitor::ReformatLiteralString(const std::string& name)
   if(name.find("#x")!=std::string::npos)
   {
     result.erase(0,2);
-    result = std::to_string(std::stoi(result,nullptr,16));
+    result = "0x"+result;
   }
   if(name.find("#b",0)==0)
   {
     result.erase(0,2);
-    result = std::to_string(std::stoi(result,nullptr,2));
+    result = "0b"+result;
   }
   if(name=="true")
     result = "1";
@@ -243,7 +246,7 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
         }
 
         Cmd->GetSort()->Accept(this);
-        Out << " result = 0;" << endl;
+        Out << " result = 0u;" << endl;
         Out << GetIndent() << "__CPROVER_program_" << program_counter << ":;"<< endl;
         Out << GetIndent() << "return result;" << endl <<"}"<< endl;
         program_counter++;
@@ -510,10 +513,9 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
     
     void PrintVisitor::VisitLetBindingTerm(const LetBindingTerm* Binding)
     {
-      Out <<" //";
+      Out <<"//local variable "<<endl;
       Binding->GetVarSort()->Accept(this);
-      Out << endl;
-      Out << Binding->GetVarName() << " = ";
+      Out << " " << Binding->GetVarName() << " = ";
       Binding->GetBoundToTerm()->Accept(this);
       Out << ";" << endl << endl;
 
@@ -584,18 +586,18 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
 
     void PrintVisitor::VisitLetTerm(const LetTerm* TheTerm)
     {
-      Out <<"{" << endl;
+    //  Out <<"{" << endl;
         Out << GetIndent();
 
        // Out << "(let (" << endl;
-          IndentLevel++;
+      //    IndentLevel++;
           for(auto const& Binding : TheTerm->GetBindings()) {
               Binding->Accept(this);
           }
    //     Out << ")" << endl;
           Out << GetIndent();
           TheTerm->GetBoundInTerm()->Accept(this);
-          IndentLevel--;
+      //    IndentLevel--;
   //        Out << endl << GetIndent() << ")";
     }
     
@@ -686,7 +688,7 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
 
     void PrintVisitor::VisitLiteral(const Literal* TheLiteral) 
     {
-        Out << TheLiteral->GetLiteralString();
+        Out << ReformatLiteralString(TheLiteral->GetLiteralString());
     }
 
     // The << operator for AST bases
