@@ -241,8 +241,10 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
         for (auto const& ASPair : Cmd->GetArgs())
         {
           Out << "const ";
-          ASPair->Accept(this);
-          Out << "= 0u;"<<endl;
+          ASPair->GetSort()->Accept(this);
+          Out << " local_" << ReformatFunctionName(ASPair->GetName());
+          Out << " = " << ReformatFunctionName(ASPair->GetName());
+          Out << ";"<< endl;
         }
 
         Cmd->GetSort()->Accept(this);
@@ -333,7 +335,7 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
       cex_counter++;
       Out << GetIndent();
       Cmd->GetSort()->Accept(this);
-      Out << " " << ReformatSymbol(Cmd->GetName()) << ";" << endl << endl;
+      Out << " " << ReformatFunctionName(Cmd->GetName()) << ";" << endl << endl;
     }
 
     void PrintVisitor::VisitPrimedVarDeclCmd(const PrimedVarDeclCmd* Cmd)
@@ -456,7 +458,7 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
     void PrintVisitor::VisitArgSortPair(const ArgSortPair* ASPair) 
     {
       ASPair->GetSort()->Accept(this);
-      Out << " " << ReformatSymbol(ASPair->GetName()) <<" ";
+      Out << " " << ReformatFunctionName(ASPair->GetName()) <<" ";
     }
     
     void PrintVisitor::VisitIntSortExpr(const IntSortExpr* Sort)
@@ -559,6 +561,19 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name)
           TheTerm->GetArgs()[1]->Accept(this);
           Out <<")";
         }
+   /*     else if(TheTerm->GetFunName()=="and3" || TheTerm->GetFunName()=="and6")
+        {
+          Out <<"(( ";
+          bool first=true;
+          for (auto const& Arg : TheTerm->GetArgs())
+          {
+            if (!first)
+               Out << ") && (";
+            first=false;
+            Arg->Accept(this);
+          }
+          Out << "))";
+        }*/
         else
         {
           Out << " "<< ReformatFunctionName(TheTerm->GetFunName()) << "( ";
