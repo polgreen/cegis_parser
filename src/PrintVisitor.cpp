@@ -51,8 +51,13 @@ void PrintVisitor::GetStringToOperatorMap() {
 std::string PrintVisitor::ReformatFunctionName(const std::string& name) {
   if (String2OperatorMap.find(name) != String2OperatorMap.end())
     return String2OperatorMap[name];
-
   std::string result = name;
+
+  if (SynthFunctions.find(name) != SynthFunctions.end())
+    result = std::string("Expression_") + name;
+  else
+    result = name;
+
   if (name.find('-') != std::string::npos &&
       BasicOperators.find(name) == BasicOperators.end()) {
     std::replace(result.begin(), result.end(), '-', '_');
@@ -208,6 +213,7 @@ void PrintVisitor::VisitFunDeclCmd(const FunDeclCmd* Cmd) {
 void PrintVisitor::VisitSynthFunCmd(const SynthFunCmd* Cmd) {
   Out << GetIndent();
   Out << "// Function to synthesise" << endl;
+  SynthFunctions.insert(Cmd->GetFunName());
   Cmd->GetSort()->Accept(this);
   Out << " EXPRESSION_" << ReformatFunctionName(Cmd->GetFunName())
       << "( const ";
