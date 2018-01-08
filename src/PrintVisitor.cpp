@@ -213,7 +213,6 @@ void PrintVisitor::VisitFunDeclCmd(const FunDeclCmd* Cmd) {
 void PrintVisitor::VisitSynthFunCmd(const SynthFunCmd* Cmd) {
   Out << GetIndent();
   Out << "// Function to synthesise" << endl;
-  SynthFunctions.insert(Cmd->GetFunName());
   Cmd->GetSort()->Accept(this);
   Out << " EXPRESSION_" << ReformatFunctionName(Cmd->GetFunName())
       << "( const ";
@@ -224,6 +223,7 @@ void PrintVisitor::VisitSynthFunCmd(const SynthFunCmd* Cmd) {
     first = false;
   }
   Out << ");" << endl;
+  SynthFunctions.insert(Cmd->GetFunName());
 
   /*  IndentLevel++;
     Out << GetIndent();
