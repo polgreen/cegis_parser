@@ -3,6 +3,30 @@
 
 namespace SynthLib2Parser {
 
+bool is_number(const std::string& s) {
+  std::string::const_iterator it = s.begin();
+  while (it != s.end() && std::isdigit(*it)) ++it;
+  return !s.empty() && it == s.end();
+}
+
+std::string PrintVisitor::ReformatSymbol(const std::string& name) {
+  std::stringstream result;
+  if (is_number(name) ||
+      (name[0] == '-' && is_number(name.substr(1, name.size() - 1)))) {
+    long value = std::stoi(name);
+    result << std::hex << value;
+    std::string hex_string = result.str();
+    while (hex_string.length() < 8) {
+      hex_string = "0" + hex_string;
+    }
+    hex_string = "#x" + hex_string;
+
+    return hex_string;
+  }
+
+  return name;
+}
+
 map<string, string> PrintVisitor::InitializeLogicGrammars() {
   map<string, string> logicGrammars;
   logicGrammars["LIA"] = "... grammara of LIA ...";
@@ -328,8 +352,9 @@ void PrintVisitor::VisitInvConstraintCmd(const InvConstraintCmd* Cmd) {
 }
 
 void PrintVisitor::VisitSetLogicCmd(const SetLogicCmd* Cmd) {
-  Out << GetIndent() << "(set-logic " << Cmd->GetLogicName() << ")" << endl
-      << endl;
+  Out << GetIndent() << "(set-logic BV )"
+      << end;  // << Cmd->GetLogicName() << ")" << endl
+               // << endl;
 }
 
 void PrintVisitor::VisitCheckSynthCmd(const CheckSynthCmd* Cmd) {
@@ -342,7 +367,9 @@ void PrintVisitor::VisitArgSortPair(const ArgSortPair* ASPair) {
   Out << ")";
 }
 
-void PrintVisitor::VisitIntSortExpr(const IntSortExpr* Sort) { Out << "Int"; }
+void PrintVisitor::VisitIntSortExpr(const IntSortExpr* Sort) {
+  Out << "(BitVec 32) ";
+}
 
 void PrintVisitor::VisitStringSortExpr(const StringSortExpr* Sort) {
   Out << "String";
@@ -411,7 +438,7 @@ void PrintVisitor::VisitLiteralTerm(const LiteralTerm* TheTerm) {
 }
 
 void PrintVisitor::VisitSymbolTerm(const SymbolTerm* TheTerm) {
-  Out << TheTerm->GetSymbol();
+  Out << ReformatSymbol(TheTerm->GetSymbol());
 }
 
 void PrintVisitor::VisitLetTerm(const LetTerm* TheTerm) {
@@ -449,7 +476,7 @@ void PrintVisitor::VisitLiteralGTerm(const LiteralGTerm* TheTerm) {
 }
 
 void PrintVisitor::VisitSymbolGTerm(const SymbolGTerm* TheTerm) {
-  Out << TheTerm->GetSymbol();
+  Out << ReformatSymbol(TheTerm->GetSymbol());
 }
 
 void PrintVisitor::VisitLetGTerm(const LetGTerm* TheTerm) {
@@ -503,7 +530,7 @@ void PrintVisitor::VisitNTDef(const NTDef* Def) {
 }
 
 void PrintVisitor::VisitLiteral(const Literal* TheLiteral) {
-  Out << TheLiteral->GetLiteralString();
+  Out << ReformatSymbol(TheLiteral->GetLiteralString());
 }
 
 // The << operator for AST bases

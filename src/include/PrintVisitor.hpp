@@ -70,6 +70,7 @@ class PrintVisitor : public ASTVisitorBase {
   virtual void VisitLiteral(const Literal* TheLiteral) override;
 
   const bool AreSyntacticRestrictionsGiven();
+  std::string ReformatSymbol(const std::string& name);
 };
 
 }  // namespace SynthLib2Parser
