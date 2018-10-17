@@ -1,6 +1,8 @@
 #include <PrintVisitor.hpp>
 #include <SymbolTable.hpp>
 
+bool has_negative_numbers;
+
 namespace SynthLib2Parser {
 
 bool is_number(const std::string& s) {
@@ -13,9 +15,18 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name) {
   std::stringstream result;
   if (is_number(name) ||
       (name[0] == '-' && is_number(name.substr(1, name.size() - 1)))) {
+      if(name[0]=='-')
+      	has_negative_numbers=true;
     long value = std::stoi(name);
     result << std::hex << value;
     std::string hex_string = result.str();
+    if(hex_string.length()>8)
+    {
+    	std::string tmp = hex_string.substr(hex_string.length()-8, hex_string.length());
+    	hex_string = tmp;
+    }
+    	
+    
     while (hex_string.length() < 8) {
       hex_string = "0" + hex_string;
     }
@@ -29,7 +40,7 @@ std::string PrintVisitor::ReformatSymbol(const std::string& name) {
 
 map<string, string> PrintVisitor::InitializeLogicGrammars() {
   map<string, string> logicGrammars;
-  logicGrammars["LIA"] = "... grammara of LIA ...";
+  logicGrammars["LIA"] = "... grammar of LIA ...";
 
   ostringstream StrInt;
   StrInt << "ConstantInt" << endl
@@ -352,13 +363,16 @@ void PrintVisitor::VisitInvConstraintCmd(const InvConstraintCmd* Cmd) {
 }
 
 void PrintVisitor::VisitSetLogicCmd(const SetLogicCmd* Cmd) {
+	has_negative_numbers=false;
   Out << GetIndent() << "(set-logic BV )"
-      << end;  // << Cmd->GetLogicName() << ")" << endl
+      << endl;  // << Cmd->GetLogicName() << ")" << endl
                // << endl;
 }
 
 void PrintVisitor::VisitCheckSynthCmd(const CheckSynthCmd* Cmd) {
   Out << GetIndent() << "(check-synth)" << endl << endl;
+  if(has_negative_numbers)
+  	Out << "; has negative numbers" << endl;
 }
 
 void PrintVisitor::VisitArgSortPair(const ArgSortPair* ASPair) {
