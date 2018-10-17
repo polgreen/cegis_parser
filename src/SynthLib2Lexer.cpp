@@ -1,6 +1,6 @@
-#line 2 "src/SynthLib2Lexer.cpp"
+#line 2 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.cpp"
 
-#line 4 "src/SynthLib2Lexer.cpp"
+#line 4 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 37
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -47,6 +47,7 @@ typedef int16_t flex_int16_t;
 typedef uint16_t flex_uint16_t;
 typedef int32_t flex_int32_t;
 typedef uint32_t flex_uint32_t;
+typedef uint64_t flex_uint64_t;
 #else
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
@@ -54,6 +55,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -83,8 +85,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -331,7 +331,7 @@ void yyfree (void *  );
 
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
-#define yywrap() 1
+#define yywrap(n) 1
 #define YY_SKIP_YYWRAP
 
 typedef unsigned char YY_CHAR;
@@ -357,7 +357,7 @@ static void yy_fatal_error (yyconst char msg[]  );
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	yyleng = (size_t) (yy_cp - yy_bp); \
+	yyleng = (yy_size_t) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
@@ -620,8 +620,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "./src/SynthLib2Lexer.l"
-#line 2 "./src/SynthLib2Lexer.l"
+#line 1 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
+#line 2 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
     #include <utility>
     #include <vector>
     #include <SynthLib2ParserIFace.hpp>
@@ -633,7 +633,7 @@ char *yytext;
     extern long yylinenum;
     extern long yycolnum;
 
-#line 637 "src/SynthLib2Lexer.cpp"
+#line 637 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.cpp"
 
 #define INITIAL 0
 #define linecomment 1
@@ -723,7 +723,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -734,7 +734,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		yy_size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -816,10 +816,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 31 "./src/SynthLib2Lexer.l"
+#line 31 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 
 
-#line 823 "src/SynthLib2Lexer.cpp"
+#line 823 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -904,169 +904,169 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 33 "./src/SynthLib2Lexer.l"
+#line 33 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum++; }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 34 "./src/SynthLib2Lexer.l"
+#line 34 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yylinenum++; yycolnum = 0; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 35 "./src/SynthLib2Lexer.l"
+#line 35 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { BEGIN linecomment; yycolnum += 1; }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 36 "./src/SynthLib2Lexer.l"
+#line 36 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { BEGIN INITIAL; yylinenum++; yycolnum = 0; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 37 "./src/SynthLib2Lexer.l"
+#line 37 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum++; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 38 "./src/SynthLib2Lexer.l"
+#line 38 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_DEFINE_SORT; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 39 "./src/SynthLib2Lexer.l"
+#line 39 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_DEFINE_FUN; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 40 "./src/SynthLib2Lexer.l"
+#line 40 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_DECLARE_FUN; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 41 "./src/SynthLib2Lexer.l"
+#line 41 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_SET_OPTIONS;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 42 "./src/SynthLib2Lexer.l"
+#line 42 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_CHECK_SYNTH; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 43 "./src/SynthLib2Lexer.l"
+#line 43 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_DECLARE_VAR; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 44 "./src/SynthLib2Lexer.l"
+#line 44 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_DECLARE_PRIMED_VAR; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 45 "./src/SynthLib2Lexer.l"
+#line 45 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_SYNTH_FUN; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 46 "./src/SynthLib2Lexer.l"
+#line 46 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_SYNTH_INV; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 47 "./src/SynthLib2Lexer.l"
+#line 47 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_SET_LOGIC; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 48 "./src/SynthLib2Lexer.l"
+#line 48 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_CONSTRAINT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 49 "./src/SynthLib2Lexer.l"
+#line 49 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_INV_CONSTRAINT; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 50 "./src/SynthLib2Lexer.l"
+#line 50 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_LPAREN; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 51 "./src/SynthLib2Lexer.l"
+#line 51 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_RPAREN; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 52 "./src/SynthLib2Lexer.l"
+#line 52 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_BV; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 53 "./src/SynthLib2Lexer.l"
+#line 53 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_ARRAY; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 54 "./src/SynthLib2Lexer.l"
+#line 54 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_INT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 55 "./src/SynthLib2Lexer.l"
+#line 55 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_STRING; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 56 "./src/SynthLib2Lexer.l"
+#line 56 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_BOOL; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 57 "./src/SynthLib2Lexer.l"
+#line 57 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_ENUM; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 58 "./src/SynthLib2Lexer.l"
+#line 58 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_REAL; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 59 "./src/SynthLib2Lexer.l"
+#line 59 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_CONSTANT; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 60 "./src/SynthLib2Lexer.l"
+#line 60 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_VARIABLE; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 61 "./src/SynthLib2Lexer.l"
+#line 61 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_INPUT_VARIABLE; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 62 "./src/SynthLib2Lexer.l"
+#line 62 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_LOCAL_VARIABLE; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 63 "./src/SynthLib2Lexer.l"
+#line 63 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_LET; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 64 "./src/SynthLib2Lexer.l"
+#line 64 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { yycolnum += strlen(yytext); return TK_DOUBLECOLON; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 65 "./src/SynthLib2Lexer.l"
+#line 65 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { 
                             yylval.LexerString = new string(yytext); 
                             yycolnum += strlen(yytext); 
@@ -1075,7 +1075,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 70 "./src/SynthLib2Lexer.l"
+#line 70 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { 
                             yylval.LexerString = new string(yytext); 
                             yycolnum += strlen(yytext); 
@@ -1084,7 +1084,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 75 "./src/SynthLib2Lexer.l"
+#line 75 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 {
                             yycolnum += strlen(yytext);
                             yylval.LexerString = new string(yytext);
@@ -1093,7 +1093,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 80 "./src/SynthLib2Lexer.l"
+#line 80 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 {
                             yycolnum += strlen(yytext);
                             string *SymbolVal = new string(yytext);
@@ -1103,7 +1103,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 86 "./src/SynthLib2Lexer.l"
+#line 86 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 {
                             yycolnum += strlen(yytext);
                             yylval.LexerString = new string(yytext);
@@ -1112,7 +1112,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 91 "./src/SynthLib2Lexer.l"
+#line 91 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 {
                             yycolnum += strlen(yytext);
                             yylval.LexerString = new string(yytext);
@@ -1121,7 +1121,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 96 "./src/SynthLib2Lexer.l"
+#line 96 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 {
                             yycolnum += strlen(yytext);
                             string *SymbolVal = new string(yytext); 
@@ -1131,7 +1131,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 102 "./src/SynthLib2Lexer.l"
+#line 102 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 {
                             yycolnum += strlen(yytext);
                             string* SymbolVal = new string(yytext);
@@ -1141,15 +1141,15 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 108 "./src/SynthLib2Lexer.l"
+#line 108 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 { return TK_ERROR; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 110 "./src/SynthLib2Lexer.l"
+#line 110 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
 ECHO;
 	YY_BREAK
-#line 1153 "src/SynthLib2Lexer.cpp"
+#line 1153 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(linecomment):
 	yyterminate();
@@ -1343,7 +1343,7 @@ static int yy_get_next_buffer (void)
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
 
 			int yy_c_buf_p_offset =
 				(int) ((yy_c_buf_p) - b->yy_ch_buf);
@@ -1476,7 +1476,7 @@ static int yy_get_next_buffer (void)
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 	yy_is_jam = (yy_current_state == 216);
 
-		return yy_is_jam ? 0 : yy_current_state;
+	return yy_is_jam ? 0 : yy_current_state;
 }
 
     static void yyunput (int c, register char * yy_bp )
@@ -1564,7 +1564,7 @@ static int yy_get_next_buffer (void)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( yywrap( ) )
-						return EOF;
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -1700,6 +1700,10 @@ static void yy_load_buffer_state  (void)
 	yyfree((void *) b  );
 }
 
+#ifndef __cplusplus
+extern int isatty (int );
+#endif /* __cplusplus */
+    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a yyrestart() or at EOF.
@@ -1904,8 +1908,8 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )
 
 /** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
- * @param yybytes the byte buffer to scan
- * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
+ * @param bytes the byte buffer to scan
+ * @param len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
@@ -1913,8 +1917,7 @@ YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len 
 {
 	YY_BUFFER_STATE b;
 	char *buf;
-	yy_size_t n;
-	int i;
+	yy_size_t n, i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -2144,4 +2147,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 110 "./src/SynthLib2Lexer.l"
+#line 110 "/Users/elipol/SyGuS_parser//src/SynthLib2Lexer.l"
